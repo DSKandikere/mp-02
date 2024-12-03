@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Personal Safety</title>
+    <link rel="stylesheet" type="text/css" href="style.css" title="style">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />    
+<style>
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+ #menubar{
+        width:1600px !important;
+      }
+      ul#menu{
+        transform: translatex(30%) !important;
+      }
+      #right-panel {
+        font-family: 'Roboto','sans-serif';
+        
+      }
+
+      #right-panel select, #right-panel input {
+        font-size: 15px;
+      }
+
+      #right-panel select {
+        width: 100%;
+      }
+
+      #right-panel i {
+        font-size: 12px;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+        width: 80%;
+      }
+      #right-panel {
+        float: right;
+        width: 10%;
+      }
+      #output {
+        font-size: 11px;
+      }
+    </style>
+  </head>
+ 
+
+<body>
+<div id="menubar">
+        <ul id="menu">
+          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+          <li><a href="index.html">Welcome Page</a></li>
+          <li  class="selected"><a href="page_one.html">Navigation</a></li>
+          
+          <li><a href="page_three.html">Guardians</a></li>
+          <li><a href="page_four.html">Safety Alarm</a></li>
+        </ul>
+      </div>
+    <div id="right-panel">
+      <div id="inputs">
+      </div>
+      <div>
+        <strong>Results</strong>
+      </div>
+      <div id="output"></div>
+    </div>
+    <div id="map"></div>
+
+
+
+</body>
+</html>
+
+<!-- leaflet js  -->
+//<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<!-- leaflet hash for sharing location  -->
+    <script src="leaflet-hash.js"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.74.0/dist/L.Control.Locate.min.js"
+      charset="utf-8"
+    ></script>
+<script>
+    // Map initialization 
+    var map = L.map('map').setView([28.3949, 84.124], 8);
+   
+    //osm layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    osm.addTo(map);
+
+    if(!navigator.geolocation) {
+        console.log("Your browser doesn't support geolocation feature!")
+    } else {
+        setInterval(() => {
+            navigator.geolocation.getCurrentPosition(getPosition)
+        }, 5000);
+    }
+
+    var marker, circle;
+
+    function getPosition(position){
+        console.log(position)
+        var lat = position.coords.latitude
+        var long = position.coords.longitude
+        var accuracy = position.coords.accuracy
+
+        if(marker) {
+            map.removeLayer(marker)
+        }
+
+        if(circle) {
+            map.removeLayer(circle)
+        }
+
+        marker = L.marker([lat, long])
+        circle = L.circle([lat, long], {radius: accuracy})
+
+        var featureGroup = L.featureGroup([marker, circle]).addTo(map)
+
+        map.fitBounds(featureGroup.getBounds())
+
+        console.log("Your coordinate is: Lat: "+ lat +" Long: "+ long+ " Accuracy: "+ accuracy)
+    }
+// click event to add marker in map
+      map.on("click", function (e) {
+        var coord = e.latlng;
+        var lat = coord.lat;
+        var lng = coord.lng;
+
+        // zoom map to new location
+        map.flyTo(new L.LatLng(lat, lng));
+
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(
+            "<h3> Your Location </h3>" +
+              "Latitude: " +
+              lat +
+              "<br> Longitude:  " +
+              lng +
+              '<br><a href="https://www.google.com/maps/search/?api=1&query=' +
+              lat +
+              "," +
+              lng +
+              '" target="_blank">Open in Google Maps</a>'
+          )
+          .openPopup();
+      });
+
+      L.control.locate().addTo(map);
+
+</script>
